@@ -23,6 +23,7 @@ function ReadArguments() {
       ;;
     --dags)
       export TEST_DAG_IDS_RAW="$2"
+      echo -e $(date) "\t\t" "passed DAGs: ${TEST_DAG_IDS_RAW}"
       shift 2
       ;;
     -v | --verbose)
@@ -42,6 +43,7 @@ function ReadArguments() {
     exit 1
   else
     IFS=',' read -r -a TEST_DAG_IDS <<< "${TEST_DAG_IDS_RAW}"
+    echo -e $(date) "\t\t" "DAGs array: ${TEST_DAG_IDS[*]}"
     export TEST_DAG_IDS
   fi
 
@@ -55,7 +57,7 @@ function wait_dags_finish() {
     dag_run_id="${TEST_DAG_RUN_IDS[${i}]}"
     dag_id="${TEST_DAG_IDS[${i}]}"
 
-    echo "Wait for the finishing of ${dag_id} and ${dag_run_id} its run"
+    echo -e $(date) "\t\t" "Wait for the finishing of ${dag_id} and its run, ${dag_run_id}"
 
     while true; do
       # Extract a dag state from the following output json.
@@ -76,22 +78,22 @@ function wait_dags_finish() {
            -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' \
            -d "{\"run_id\": \"${dag_id}\"}" --silent \
            | jq -r -c ".[] | select(.run_id == \"${dag_run_id}\") | .state")
-      echo "${state}"
+      echo -e $(date) "\t\t" "${state}"
       case "${state}" in
       "success")
-        echo "DAG run ${dag_run_id} finished"
+        echo -e $(date) "\t\t" "DAG run ${dag_run_id} finished"
         break
         ;;
       "running")
-        echo "DAG run ${dag_run_id} is running. Sleeping 30 sec..."
+        echo -e $(date) "\t\t" "DAG run ${dag_run_id} is running. Sleeping 30 sec..."
         sleep 30
         ;;
       "failed")
-        echo "DAG run ${dag_run_id} failed"
+        echo -e $(date) "\t\t" "DAG run ${dag_run_id} failed"
         exit 1
         ;;
       *)
-        echo "${state} is unknown state of the ${dag_run_id} DAG"
+        echo -e $(date) "\t\t" "${state} is unknown state of the ${dag_run_id} DAG"
         exit 1
         ;;
       esac
@@ -99,22 +101,38 @@ function wait_dags_finish() {
   done
 }
 
+echo START
 export TEST_DAG_RUN_IDS=()
+
+echo START_ReadArguments
 ReadArguments "$@"
+echo END_ReadArguments
+
+echo START POD export
 POD=$(${KUBECTL} get pods -l app=airflow -l component=web -n "${AIRFLOW_NAMESPACE}" -o jsonpath='{.items[0].metadata.name}')
 export POD
+echo -e $(date) "\t\t" "POD: ${POD}"
+echo END POD export
 
+echo START Run all test dags
 # Run all test dags
+echo -e $(date) "\t\t" "TEST_DAG_IDS[@]" ${TEST_DAG_IDS[@]}
 for dag_id in "${TEST_DAG_IDS[@]}"; do
+  echo START CYCLE
+  echo -e $(date) "\t\t" "dag_id" ${dag_id}
   dag_run_id="${dag_id}-ci-$(date +%s)"
   TEST_DAG_RUN_IDS+=("${dag_run_id}")
 
-  echo "Run the ${dag_run_id} of ${dag_id} dag"
+  echo MAKE POST DAG
+  echo -e $(date) "\t\t" "Run the ${dag_run_id} of ${dag_id} dag"
   ${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
   curl -X POST   http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs  \
        -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json'  \
-       -d "{\"run_id\": \"${dag_run_id}\"}" --silent
-
+       -d '{"conf":"{\"run_id\": \"${dag_run_id}\"}"}' --silent
+  echo END POST DAG
+  echo END CYCLE
 done
 
+echo START wait_dags_finish
 wait_dags_finish
+echo END wait_dags_finish
