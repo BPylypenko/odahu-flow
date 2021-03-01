@@ -27,3 +27,5 @@ MODEL_DEPLOYMENT_DEFAULT_ROUTE_URL = '/api/{version}/model/deployment/{id}/defau
 MODEL_ROUTE_URL = '/api/{version}/model/route'
 MODEL_PACKING_URL = '/api/{version}/model/packaging'
 PACKING_INTEGRATION_URL = '/api/{version}/packaging/integration'
+FEEDBACK_URL = '/api/{version}/feedback'
+USER_INFO_URL = '/api/{version}/user/info'
