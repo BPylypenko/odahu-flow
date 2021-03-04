@@ -33,7 +33,7 @@ from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClie
 from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, AsyncModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient, AsyncToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient, ModelTraining, AsyncModelTrainingClient
-from odahuflow.sdk.clients.feedback import FeedbackModelFeedbackResponse, FeedbackClient, AsyncFeedbackClient
+from odahuflow.sdk.clients.feedback import FeedbackModelFeedbackRequest, FeedbackClient, AsyncFeedbackClient
 from odahuflow.sdk.clients.user_info import UserInfo, UserInfoClient, AsyncUserInfoClient
 from odahuflow.sdk.models import Connection, ToolchainIntegration, ModelPackaging, PackagingIntegration
 
@@ -109,7 +109,7 @@ def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteA
         return ModelPackagingClient.construct_from_other(api_client)
     elif isinstance(resource.resource, PackagingIntegration):
         return PackagingIntegrationClient.construct_from_other(api_client)
-    elif isinstance(resource.resource, FeedbackModelFeedbackResponse):
+    elif isinstance(resource.resource, FeedbackModelFeedbackRequest):
         return FeedbackClient.construct_from_other(api_client)
     elif isinstance(resource.resource, UserInfo):
         return UserInfoClient.construct_from_other(api_client)
@@ -142,7 +142,7 @@ def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
         return AsyncModelPackagingClient.construct_from_other(async_api_client)
     elif isinstance(resource.resource, PackagingIntegration):
         return AsyncPackagingIntegrationClient.construct_from_other(async_api_client)
-    elif isinstance(resource.resource, FeedbackModelFeedbackResponse):
+    elif isinstance(resource.resource, FeedbackModelFeedbackRequest):
         return AsyncFeedbackClient.construct_from_other(async_api_client)
     elif isinstance(resource.resource, UserInfo):
         return AsyncUserInfoClient.construct_from_other(async_api_client)

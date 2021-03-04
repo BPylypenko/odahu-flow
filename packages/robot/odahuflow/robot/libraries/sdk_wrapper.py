@@ -246,14 +246,6 @@ class Toolchain:
         return ToolchainIntegrationClient().delete(ti_id)
 
 
-class Feedback:
-
-    @staticmethod
-    def feedback_create(payload_file: str, model_name: str, model_version: str, request_id: str):
-        api_object = parse_resources_file_with_one_item(payload_file).resource
-        return FeedbackClient().create(api_object, model_name, model_version, request_id)
-
-
 class UserInfo:
 
     @staticmethod
