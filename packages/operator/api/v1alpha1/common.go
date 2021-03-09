@@ -29,3 +29,18 @@ type Modifiable struct {
 	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 }
+
+type VCS struct {
+	ConnName  string `json:"connName"`
+	Reference string `json:"reference"`
+}
+
+type ObjectStorage struct {
+	ConnName string `json:"connName"`
+	Path     string `json:"path"`
+}
+
+type AlgorithmSource struct {
+	VCS           VCS           `json:"vcs,omitempty"`
+	ObjectStorage ObjectStorage `json:"objectStorage,omitempty"`
+}

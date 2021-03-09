@@ -3058,6 +3058,19 @@ var doc = `{
                 }
             }
         },
+        "AlgorithmSource": {
+            "type": "object",
+            "properties": {
+                "objectStorage": {
+                    "type": "object",
+                    "$ref": "#/definitions/ObjectStorage"
+                },
+                "vcs": {
+                    "type": "object",
+                    "$ref": "#/definitions/VCS"
+                }
+            }
+        },
         "ConnectionSpec": {
             "type": "object",
             "properties": {
@@ -3382,6 +3395,11 @@ var doc = `{
         "ModelTrainingSpec": {
             "type": "object",
             "properties": {
+                "algorithmSource": {
+                    "description": "AlgorithmSource for training",
+                    "type": "object",
+                    "$ref": "#/definitions/AlgorithmSource"
+                },
                 "args": {
                     "type": "array",
                     "items": {
@@ -3433,10 +3451,6 @@ var doc = `{
                     "description": "Name of Connection to storage where training output artifact will be stored.\nPermitted connection types are defined by specific toolchain",
                     "type": "string"
                 },
-                "reference": {
-                    "description": "VCS Reference",
-                    "type": "string"
-                },
                 "resources": {
                     "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
                     "type": "object",
@@ -3444,10 +3458,6 @@ var doc = `{
                 },
                 "toolchain": {
                     "description": "IntegrationName of toolchain",
-                    "type": "string"
-                },
-                "vcsName": {
-                    "description": "Name of Connection resource. Must exists",
                     "type": "string"
                 },
                 "workDir": {
@@ -3490,6 +3500,17 @@ var doc = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "ObjectStorage": {
+            "type": "object",
+            "properties": {
+                "connName": {
+                    "type": "string"
+                },
+                "path": {
                     "type": "string"
                 }
             }
@@ -3612,6 +3633,17 @@ var doc = `{
                 },
                 "runId": {
                     "description": "Mlflow run ID",
+                    "type": "string"
+                }
+            }
+        },
+        "VCS": {
+            "type": "object",
+            "properties": {
+                "connName": {
+                    "type": "string"
+                },
+                "reference": {
                     "type": "string"
                 }
             }
