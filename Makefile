@@ -179,7 +179,7 @@ helm-delete:
 
 ## install-python-linter: Install python test dependencies
 install-python-linter:
-	pip install -U pip pipenv pylint
+	"${PIP_BIN}" install -U pip pipenv pylint
 	cd packages/cli && pipenv install --system --three --dev
 
 ## python-lint: Lints python source code
@@ -213,7 +213,7 @@ generate-python-client:
 
 ## install-python-tests: Install python test dependencies
 install-python-tests:
-	pip install -U pip pipenv
+	"${PIP_BIN}" install -U pip pipenv
 	cd packages/cli && pipenv install --system --three --dev
 
 ## python-unittests: Run pythoon unit tests
