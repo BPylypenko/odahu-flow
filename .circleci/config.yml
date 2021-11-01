@@ -3,22 +3,19 @@ workflows:
   main:
     jobs:
       - vulnerabilities
-      - test_coverage
-      - python:
-          requires:
-            - test_coverage
-      - operator:
-          requires:
-            - test_coverage
-      - feedback_aggregator:
-          requires:
-            - test_coverage
-      - build:
-          context:
-            - hub.docker.com
-          requires:
-            - vulnerabilities
-            - test_coverage
+      - test
+      - python
+      - operator
+      - feedback_aggregator
+      # - build:
+      #     context:
+      #       - hub.docker.com
+      #     requires:
+      #       - vulnerabilities
+      #       - python
+      #       - operator
+      #       - feedback_aggregator
+      #       - test
 jobs:
   vulnerabilities:
     docker:
@@ -93,14 +90,6 @@ jobs:
           command: |
             cd packages/operator
             make lint
-      - attach_workspace:
-          at: /tmp/codecov-uploader
-      - run:
-          name: Test
-          command: |
-            cd packages/operator
-            make test
-            /tmp/codecov-uploader/codecov -vF go,operator
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
@@ -132,20 +121,45 @@ jobs:
           command: |
             cd packages/feedback
             make lint
-      - attach_workspace:
-          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             cd packages/feedback
             make test
             /tmp/codecov-uploader/codecov -vF go,feedback
-  test_coverage:
+  test:
     docker:
-      - image: cimg/base:stable-20.04
+      - image: cimg/python:3.6
     steps:
+      - checkout
       - run:
-          name: Prepare
+          name: Setup miniconda
+          command: |
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            bash miniconda.sh -b -p $HOME/miniconda
+      - run:
+          name: Install Python deps
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make install-all
+            make install-python-tests
+      - run:
+          name: Setup Go
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install pigz golang-1.17
+            wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
+            sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
+            sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
+            wget -q https://github.com/swaggo/swag/releases/download/v1.6.5/swag_1.6.5_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
+            sudo tar -zxvf /tmp/swag.tar.gz -C /usr/local/
+            sudo mv /usr/local/swag /usr/bin/
+            wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.5.0/gotestsum_0.5.0_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+            sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+            sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+            go get github.com/t-yuki/gocover-cobertura
+      - run:
+          name: Setup Codecov
           command: |
             # Codecov uploader https://docs.codecov.com/docs/codecov-uploader
             curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
@@ -155,10 +169,24 @@ jobs:
             gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
             shasum -a 256 -c codecov.SHA256SUM
             chmod +x codecov
-      - persist_to_workspace:
-          root: .
-          paths:
-            - codecov
+      - run:
+          name: Python test
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make python-unittests
+            ./codecov -f coverage.xml -vF python
+      - run:
+          name: Go Operator Test
+          command: |
+            cd packages/operator
+            make test
+            ./codecov -vF go,operator
+      - run:
+          name: Go Feedback Test
+          command: |
+            cd packages/feedback
+            make test
+            ./codecov -vF go,feedback
   build:
     docker:
       - image: cimg/base:stable-20.04
