@@ -115,7 +115,7 @@ jobs:
             make lint
   test:
     docker:
-      - image: cimg/python:3.6
+      - image: circleci/python:3.6
     steps:
       - checkout
       - run:
