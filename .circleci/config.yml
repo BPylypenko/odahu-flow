@@ -133,7 +133,7 @@ jobs:
           name: Setup Go
           command: |
             sudo apt-get update -qq
-            sudo apt-get install pigz golang-1.17
+            sudo apt-get install pigz golang-1.14
             wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
             sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
             sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
