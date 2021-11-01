@@ -213,7 +213,7 @@ generate-python-client:
 
 ## install-python-tests: Install python test dependencies
 install-python-tests:
-	pip install pipenv
+	pip install -U pip pipenv
 	cd packages/cli && pipenv install --system --three --dev
 
 ## python-unittests: Run pythoon unit tests
