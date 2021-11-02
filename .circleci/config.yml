@@ -115,11 +115,11 @@ jobs:
             make lint
   test:
     docker:
-      - image: circleci/python:3.6
+      - image: cimg/base:stable-20.04
     steps:
       - checkout
       - run:
-          name: Setup miniconda
+          name: Setup Python
           command: |
             wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
             bash miniconda.sh -b -p $HOME/miniconda
@@ -127,6 +127,8 @@ jobs:
           name: Install Python deps
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
+            conda create -n odahu-flow-py36 python=3.6
+            conda activate odahu-flow-py36
             make install-all
             make install-python-tests
       - run:
@@ -159,6 +161,7 @@ jobs:
           name: Python test
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
+            conda activate odahu-flow-py36
             make python-unittests
             ./codecov -f coverage.xml -vF python
       - run:
