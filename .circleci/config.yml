@@ -54,11 +54,8 @@ jobs:
       - run:
           name: Setup deps
           command: |
-            GO_VERSION=1.14
             sudo apt-get update -qq
-            sudo apt-get install pigz golang-${GO_VERSION}
-            printf '\nexport PATH=$PATH:/usr/lib/go-${GO_VERSION}/bin\n' >> ~/.bashrc
-            source ~/.bashrc
+            sudo apt-get install pigz golang-1.14
             wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
             sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
             sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
@@ -137,8 +134,11 @@ jobs:
       - run:
           name: Setup Go
           command: |
+            GO_VERSION=1.14
             sudo apt-get update -qq
-            sudo apt-get install pigz golang-1.14
+            sudo apt-get install pigz golang-${GO_VERSION}
+            printf '\nexport PATH=$PATH:/usr/lib/go-${GO_VERSION}/bin\n' >> ~/.bashrc
+            source ~/.bashrc
             wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
             sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
             sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
